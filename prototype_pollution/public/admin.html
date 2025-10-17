@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理パネル - SecureCloud</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-icon">🔒</span>
+                <span>SecureCloud</span>
+            </a>
+            <nav>
+                <a href="/">ダッシュボード</a>
+                <a href="/settings.html">設定</a>
+                <a href="/debug.html">システム情報</a>
+            </nav>
+            <div class="user-badge">
+                <span class="status-dot"></span>
+                <span id="currentUser">guest</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="alert" class="alert"></div>
+
+        <div class="card">
+            <h2>管理者アクセス制御</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">
+                このエリアには機密性の高い管理機能が含まれています。アクセスには昇格された権限が必要です。
+            </p>
+
+            <div class="info-box" style="margin-bottom: 2rem;">
+                <div class="info-row">
+                    <span class="info-label">現在のユーザー</span>
+                    <span class="info-value" id="displayUsername">guest</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">アクセスレベル</span>
+                    <span class="info-value" id="currentRole" style="color: var(--warning)">user</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">必要なレベル</span>
+                    <span class="info-value" style="color: var(--danger)">admin</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">確認するアカウント</label>
+                <input type="text" id="username" value="guest" placeholder="ユーザー名を入力">
+            </div>
+
+            <button id="getFlagBtn" onclick="accessAdminResource()">
+                <span id="btnText">🔑 管理リソースにアクセス</span>
+                <span id="btnLoading" class="loading" style="display: none;"></span>
+            </button>
+        </div>
+
+        <div id="flagResult" style="display: none;">
+            <div class="flag-container">
+                <div class="flag-icon">🚩</div>
+                <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">アクセス許可</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">管理リソースキー:</p>
+                <div class="flag-text" id="flagText"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>管理機能</h2>
+            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                <div style="padding: 1rem; background: var(--surface-light); border-radius: 0.5rem; border-left: 3px solid var(--primary);">
+                    <h3 style="color: var(--primary); margin-bottom: 0.5rem; font-size: 1.1rem;">🔐 セキュリティキー</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">システムのセキュリティキーと証明書へのアクセスと管理</p>
+                </div>
+                <div style="padding: 1rem; background: var(--surface-light); border-radius: 0.5rem; border-left: 3px solid var(--secondary);">
+                    <h3 style="color: var(--secondary); margin-bottom: 0.5rem; font-size: 1.1rem;">👥 ユーザー管理</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">ユーザーアカウントと権限の作成、変更、削除</p>
+                </div>
+                <div style="padding: 1rem; background: var(--surface-light); border-radius: 0.5rem; border-left: 3px solid var(--accent);">
+                    <h3 style="color: var(--accent); margin-bottom: 0.5rem; font-size: 1.1rem;">📊 システムログ</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">詳細なシステムアクティビティログの表示と分析</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>セキュリティ通知</h2>
+            <div style="background: rgba(255, 71, 87, 0.1); border: 1px solid var(--danger); border-radius: 0.5rem; padding: 1.25rem;">
+                <p style="color: var(--danger); display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.5rem;">⚠️</span>
+                    <span>不正なアクセス試行はログに記録され、監視されます。管理機能には適切な認証と承認が必要です。</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type} show`;
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            alert.innerHTML = `<span style="font-size: 1.25rem;">${icon}</span><span>${message}</span>`;
+            
+            setTimeout(() => {
+                alert.className = 'alert';
+            }, 5000);
+        }
+
+        async function accessAdminResource() {
+            const username = document.getElementById('username').value;
+            const getFlagBtn = document.getElementById('getFlagBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+
+            getFlagBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(`/api/admin/flag?username=${username}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('flagText').textContent = data.flag;
+                    document.getElementById('flagResult').style.display = 'block';
+                    showAlert('管理者アクセスが許可されました！', 'success');
+                } else {
+                    showAlert(`アクセス拒否: ${data.error}`, 'error');
+                    document.getElementById('flagResult').style.display = 'none';
+                }
+            } catch (error) {
+                showAlert(`接続エラー: ${error.message}`, 'error');
+                document.getElementById('flagResult').style.display = 'none';
+            } finally {
+                getFlagBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        }
+
+        async function loadUserRole() {
+            try {
+                const username = document.getElementById('username').value;
+                const response = await fetch(`/api/user/${username}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('currentRole').textContent = data.user.role;
+                    document.getElementById('displayUsername').textContent = data.user.username;
+                    document.getElementById('currentUser').textContent = data.user.username;
+                    
+                    const roleElement = document.getElementById('currentRole');
+                    if (data.user.role === 'admin') {
+                        roleElement.style.color = 'var(--success)';
+                    } else {
+                        roleElement.style.color = 'var(--warning)';
+                    }
+                }
+            } catch (error) {
+                console.error('ユーザーロールの読み込みエラー:', error);
+            }
+        }
+
+        loadUserRole();
+        
+        document.getElementById('username').addEventListener('change', loadUserRole);
+    </script>
+</body>
+</html>

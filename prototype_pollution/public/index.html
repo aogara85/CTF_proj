@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureCloud - 設定管理システム</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-icon">🔒</span>
+                <span>SecureCloud</span>
+            </a>
+            <nav>
+                <a href="/" class="active">ダッシュボード</a>
+                <a href="/settings.html">設定</a>
+                <a href="/debug.html">システム情報</a>
+            </nav>
+            <div class="user-badge">
+                <span class="status-dot"></span>
+                <span id="currentUser">guest</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>SecureCloud 設定管理システムへようこそ</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                企業向けのモダンなクラウドベース設定管理プラットフォームです。
+                アプリケーション設定、ユーザー設定、システム構成を一つの集中管理ダッシュボードから管理できます。
+            </p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">アクティブユーザー</div>
+                    <div class="stat-value">1,247</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">設定数</div>
+                    <div class="stat-value">3,892</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">今日のAPI呼び出し</div>
+                    <div class="stat-value">45.2K</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>アカウント情報</h2>
+            <div id="userInfo" class="info-box">
+                <div class="info-row">
+                    <span class="info-label">ユーザー名</span>
+                    <span class="info-value" id="username">guest</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">アクセスレベル</span>
+                    <span class="info-value" id="userRole">user</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">アカウント状態</span>
+                    <span class="info-value" style="color: var(--success)">アクティブ</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">最終ログイン</span>
+                    <span class="info-value" id="lastLogin">-</span>
+                </div>
+            </div>
+            <button onclick="loadUserInfo()">
+                <span>🔄 アカウント情報を更新</span>
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>プラットフォーム機能</h2>
+            <div style="display: grid; gap: 1.5rem; margin-top: 1rem;">
+                <div style="display: flex; gap: 1rem; align-items: start;">
+                    <span style="font-size: 2rem;">⚙️</span>
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">設定管理</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            直感的なJSONベースのインターフェースでアプリケーション設定を構成・更新できます。
+                        </p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: start;">
+                    <span style="font-size: 2rem;">🛡️</span>
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">セキュリティ管理</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            システム管理とモニタリングのための高度な管理機能を提供します。
+                        </p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: start;">
+                    <span style="font-size: 2rem;">📊</span>
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: 0.5rem;">システム診断</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">
+                            開発者向けのリアルタイムシステム情報とデバッグツールを利用できます。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>クイックアクション</h2>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                <a href="/settings.html" class="btn" style="text-decoration: none;">
+                    設定を更新
+                </a>
+                <a href="/debug.html" class="btn secondary" style="text-decoration: none;">
+                    システム情報
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user/guest');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('username').textContent = data.user.username;
+                    document.getElementById('userRole').textContent = data.user.role;
+                    document.getElementById('currentUser').textContent = data.user.username;
+                    
+                    const now = new Date();
+                    document.getElementById('lastLogin').textContent = now.toLocaleString('ja-JP');
+                }
+            } catch (error) {
+                console.error('ユーザー情報の読み込みエラー:', error);
+            }
+        }
+
+        loadUserInfo();
+    </script>
+</body>
+</html>

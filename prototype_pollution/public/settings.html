@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 - SecureCloud</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-icon">🔒</span>
+                <span>SecureCloud</span>
+            </a>
+            <nav>
+                <a href="/">ダッシュボード</a>
+                <a href="/settings.html" class="active">設定</a>
+                <a href="/debug.html">システム情報</a>
+            </nav>
+            <div class="user-badge">
+                <span class="status-dot"></span>
+                <span id="currentUser">guest</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="alert" class="alert"></div>
+
+        <div class="card">
+            <h2>設定エディター</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">
+                JSON形式でアプリケーション設定を更新できます。変更はアカウントに即座に適用されます。
+            </p>
+
+            <div class="form-group">
+                <label for="username">アカウント</label>
+                <input type="text" id="username" value="guest" placeholder="ユーザー名を入力">
+            </div>
+
+            <div class="form-group">
+                <label for="settingsJson">設定 JSON</label>
+                <textarea id="settingsJson" class="code-editor" placeholder='JSON形式で設定を入力してください...'>{
+  "theme": "dark",
+  "language": "ja",
+  "notifications": {
+    "email": true,
+    "push": false,
+    "desktop": true
+  },
+  "security": {
+    "twoFactor": false,
+    "sessionTimeout": 3600
+  }
+}</textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button id="updateBtn" onclick="updateSettings()">
+                    <span id="btnText">💾 設定を適用</span>
+                    <span id="btnLoading" class="loading" style="display: none;"></span>
+                </button>
+                <button class="secondary" onclick="resetSettings()">
+                    🔄 デフォルトに戻す
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>現在の設定</h2>
+            <div id="currentSettings" class="debug-output">
+設定を読み込み中...
+            </div>
+            <button class="secondary" onclick="loadSettings()" style="margin-top: 1rem;">
+                🔄 更新
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>設定例</h2>
+            <div class="info-box">
+                <p style="margin-bottom: 1rem;">よく使用される設定パターンの例：</p>
+                
+                <h3 style="color: var(--secondary); font-size: 1rem; margin: 1.5rem 0 0.5rem 0;">基本的なテーマ設定</h3>
+                <div class="code-editor">{
+  "theme": "light",
+  "accentColor": "#0a84ff"
+}</div>
+                
+                <h3 style="color: var(--secondary); font-size: 1rem; margin: 1.5rem 0 0.5rem 0;">ネストされた設定</h3>
+                <div class="code-editor">{
+  "display": {
+    "theme": "dark",
+    "fontSize": 14
+  },
+  "privacy": {
+    "analytics": false
+  }
+}</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.className = `alert alert-${type} show`;
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            alert.innerHTML = `<span style="font-size: 1.25rem;">${icon}</span><span>${message}</span>`;
+            
+            setTimeout(() => {
+                alert.className = 'alert';
+            }, 5000);
+        }
+
+        async function updateSettings() {
+            const username = document.getElementById('username').value;
+            const settingsText = document.getElementById('settingsJson').value;
+            const updateBtn = document.getElementById('updateBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+
+            let settings;
+            try {
+                settings = JSON.parse(settingsText);
+            } catch (error) {
+                showAlert('無効なJSON形式です。構文を確認してください。', 'error');
+                return;
+            }
+
+            updateBtn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(`/api/update-settings?username=${username}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(settings)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('設定が正常に更新されました！', 'success');
+                    loadSettings();
+                } else {
+                    showAlert(`更新に失敗しました: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showAlert(`接続エラー: ${error.message}`, 'error');
+            } finally {
+                updateBtn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoading.style.display = 'none';
+            }
+        }
+
+        async function loadSettings() {
+            const username = document.getElementById('username').value;
+            
+            try {
+                const response = await fetch(`/api/settings?username=${username}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('currentSettings').textContent = 
+                        JSON.stringify(data.settings, null, 2);
+                } else {
+                    document.getElementById('currentSettings').textContent = 
+                        `エラー: ${data.error}`;
+                }
+            } catch (error) {
+                document.getElementById('currentSettings').textContent = 
+                    `接続エラー: ${error.message}`;
+            }
+        }
+
+        function resetSettings() {
+            document.getElementById('settingsJson').value = `{
+  "theme": "dark",
+  "language": "ja",
+  "notifications": {
+    "email": true,
+    "push": false,
+    "desktop": true
+  },
+  "security": {
+    "twoFactor": false,
+    "sessionTimeout": 3600
+  }
+}`;
+        }
+
+        loadSettings();
+    </script>
+</body>
+</html>

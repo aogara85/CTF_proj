@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>システム情報 - SecureCloud</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-icon">🔒</span>
+                <span>SecureCloud</span>
+            </a>
+            <nav>
+                <a href="/">ダッシュボード</a>
+                <a href="/settings.html">設定</a>
+                <a href="/debug.html" class="active">システム情報</a>
+            </nav>
+            <div class="user-badge">
+                <span class="status-dot"></span>
+                <span id="currentUser">guest</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>システム診断</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">
+                開発者と管理者向けのリアルタイムシステム情報と内部状態モニタリング。
+            </p>
+            
+            <button onclick="loadDebugInfo()" style="margin-bottom: 1.5rem;">
+                🔄 診断情報を更新
+            </button>
+            
+            <div id="debugOutput" class="debug-output">
+診断を初期化中...
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>実行環境</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Node.js バージョン</div>
+                    <div class="stat-value" style="font-size: 1.25rem;">v18.x</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">プラットフォーム</div>
+                    <div class="stat-value" style="font-size: 1.25rem;">Linux</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">稼働時間</div>
+                    <div class="stat-value" id="uptime" style="font-size: 1.25rem;">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>クライアントサイド診断</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                JavaScriptランタイム分析とオブジェクトプロトタイプ検査。
+            </p>
+            
+            <button onclick="runClientTests()" style="margin-bottom: 1.5rem;">
+                ▶️ クライアントテストを実行
+            </button>
+            
+            <div id="testOutput" class="debug-output">
+「クライアントテストを実行」をクリックしてJavaScriptランタイムを分析...
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>APIドキュメント</h2>
+            <div class="info-box">
+                <h3 style="color: var(--secondary); margin-bottom: 1rem;">利用可能なエンドポイント</h3>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="background: var(--success); color: var(--bg-dark); padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">POST</span>
+                        <code style="color: var(--primary);">/api/update-settings</code>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-left: 3.5rem;">ユーザー設定の更新</p>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="background: var(--secondary); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">GET</span>
+                        <code style="color: var(--primary);">/api/admin/flag</code>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-left: 3.5rem;">管理リソースキーの取得（管理者権限が必要）</p>
+                </div>
+
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="background: var(--secondary); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">GET</span>
+                        <code style="color: var(--primary);">/api/debug</code>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-left: 3.5rem;">システム診断と内部状態</p>
+                </div>
+
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <span style="background: var(--secondary); color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600;">GET</span>
+                        <code style="color: var(--primary);">/api/user/:username</code>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-left: 3.5rem;">ユーザーアカウント情報の取得</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let startTime = Date.now();
+
+        async function loadDebugInfo() {
+            const output = document.getElementById('debugOutput');
+            output.textContent = '診断情報を読み込み中...';
+            
+            try {
+                const response = await fetch('/api/debug');
+                const data = await response.json();
+                
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                output.textContent = `接続エラー: ${error.message}`;
+            }
+        }
+
+        function runClientTests() {
+            const output = document.getElementById('testOutput');
+            const results = [];
+
+            results.push('╔══════════════════════════════════════════════════════╗');
+            results.push('║      JavaScript ランタイム分析 v1.0                 ║');
+            results.push('╚══════════════════════════════════════════════════════╝');
+            results.push('');
+
+            results.push('─── テスト 1: オブジェクトプロトタイプ分析 ───');
+            const emptyObj = {};
+            results.push(`• 空オブジェクトの固有キー: [${Object.keys(emptyObj).join(', ') || 'なし'}]`);
+            results.push(`• プロトタイプチェーンに 'defaultRole' が存在: ${'defaultRole' in emptyObj}`);
+            results.push(`• defaultRole の値: ${emptyObj.defaultRole || 'undefined'}`);
+            results.push('');
+
+            results.push('─── テスト 2: プロトタイプチェーン構造 ───');
+            results.push(`• Object.prototype の列挙可能なキー: [${Object.keys(Object.prototype).join(', ') || 'なし'}]`);
+            results.push(`• プロトタイプ汚染検出: ${Object.keys(Object.prototype).length > 0 ? 'はい ⚠️' : 'いいえ ✓'}`);
+            results.push('');
+
+            results.push('─── テスト 3: コンストラクタアクセスパス ───');
+            const testObj = {};
+            results.push(`• testObj.constructor === Object: ${testObj.constructor === Object}`);
+            results.push(`• testObj.constructor.prototype === Object.prototype: ${testObj.constructor.prototype === Object.prototype}`);
+            results.push('');
+
+            results.push('─── テスト 4: プロパティ継承 ───');
+            const childObj = Object.create({ inheritedProp: '継承された値' });
+            childObj.ownProp = '固有の値';
+            results.push(`• 固有プロパティ: ${childObj.ownProp}`);
+            results.push(`• 継承プロパティ: ${childObj.inheritedProp}`);
+            results.push(`• hasOwnProperty('ownProp'): ${childObj.hasOwnProperty('ownProp')}`);
+            results.push(`• hasOwnProperty('inheritedProp'): ${childObj.hasOwnProperty('inheritedProp')}`);
+            results.push('');
+
+            results.push('─── テスト 5: 汚染状態チェック ───');
+            const checkObj = {};
+            results.push(`• Object.prototype の整合性を確認中...`);
+            if ('defaultRole' in checkObj) {
+                results.push(`• ⚠️  汚染が検出されました！`);
+                results.push(`• 汚染されたプロパティ 'defaultRole' = '${checkObj.defaultRole}'`);
+                results.push(`• システム整合性: 侵害されています`);
+            } else {
+                results.push(`• ✓  汚染は検出されませんでした`);
+                results.push(`• システム整合性: 正常です`);
+            }
+            results.push('');
+
+            results.push('═══════════════════════════════════════════════════════');
+            results.push(`分析完了時刻: ${new Date().toLocaleTimeString('ja-JP')}`);
+
+            output.textContent = results.join('\n');
+        }
+
+        function updateUptime() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hours = Math.floor(elapsed / 3600);
+            const minutes = Math.floor((elapsed % 3600) / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('uptime').textContent = 
+                `${hours}時間 ${minutes}分 ${seconds}秒`;
+        }
+
+        loadDebugInfo();
+        setInterval(updateUptime, 1000);
+    </script>
+</body>
+</html>
