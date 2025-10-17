@@ -1,0 +1,21 @@
+# SecureCloud Settings Manager
+# Robots Exclusion Protocol
+
+User-agent: *
+Allow: /
+Allow: /settings.html
+Allow: /debug.html
+Disallow: /admin.html
+Disallow: /api/admin/
+Disallow: /.env
+Disallow: /config/
+Disallow: /logs/
+
+# Development and testing paths
+Disallow: /dev/
+Disallow: /test/
+Disallow: /backup/
+
+
+# Security note: Admin panel access restricted to authorized personnel only
+# For administrative access, contact: admin@securecloud.example.com

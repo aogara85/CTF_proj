@@ -154,6 +154,11 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// 404 ハンドラー（最後に配置）
+app.use((req, res) => {
+  res.status(404).sendFile(__dirname + '/public/404.html');
+});
+
 // サーバー起動
 app.listen(PORT, () => {
   console.log(`┌─────────────────────────────────────────────────┐`);

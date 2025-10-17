@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - ページが見つかりません | SecureCloud</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="/" class="logo">
+                <span class="logo-icon">🔒</span>
+                <span>SecureCloud</span>
+            </a>
+            <nav>
+                <a href="/">ダッシュボード</a>
+                <a href="/settings.html">設定</a>
+                <a href="/debug.html">システム情報</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card" style="text-align: center; padding: 4rem 2rem;">
+            <div class="access-denied-icon" style="font-size: 8rem; margin-bottom: 2rem;">
+                🔍
+            </div>
+            <h1 style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">404</h1>
+            <h2 style="font-size: 1.5rem; color: var(--text); margin-bottom: 1rem;">ページが見つかりません</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                お探しのページは存在しないか、移動または削除された可能性があります。
+            </p>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 3rem;">
+                <a href="/" class="btn" style="text-decoration: none;">
+                    🏠 ホームに戻る
+                </a>
+                <a href="/settings.html" class="btn secondary" style="text-decoration: none;">
+                    ⚙️ 設定ページ
+                </a>
+            </div>
+
+            <div style="background: var(--surface-light); border-radius: 0.5rem; padding: 1.5rem; max-width: 600px; margin: 0 auto; text-align: left;">
+                <h3 style="color: var(--secondary); margin-bottom: 1rem; font-size: 1.1rem;">💡 お探しですか？</h3>
+                <ul style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.8;">
+                    <li><a href="/" style="color: var(--primary); text-decoration: none;">ダッシュボード</a> - システムの概要</li>
+                    <li><a href="/settings.html" style="color: var(--primary); text-decoration: none;">設定</a> - アプリケーション設定の管理</li>
+                    <li><a href="/debug.html" style="color: var(--primary); text-decoration: none;">システム情報</a> - 診断とAPI情報</li>
+                    <li style="color: var(--text-muted);">管理パネル - 認証されたユーザーのみアクセス可能</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>よくあるエラーの原因</h2>
+            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                <div style="padding: 1rem; background: var(--surface-light); border-radius: 0.5rem; border-left: 3px solid var(--warning);">
+                    <h3 style="color: var(--warning); margin-bottom: 0.5rem; font-size: 1rem;">⚠️ URLの入力ミス</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">URLが正しく入力されているか確認してください。</p>
+                </div>
+                <div style="padding: 1rem; background: var(--surface-light); border-radius: 0.5rem; border-left: 3px solid var(--secondary);">
+                    <h3 style="color: var(--secondary); margin-bottom: 0.5rem; font-size: 1rem;">🔗 古いリンク</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">ブックマークや外部リンクが古い可能性があります。</p>
+                </div>
+                <div style="padding: 1rem; background: var(--surface-light); border-radius: 0.5rem; border-left: 3px solid var(--danger);">
+                    <h3 style="color: var(--danger); margin-bottom: 0.5rem; font-size: 1rem;">🔒 アクセス制限</h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">一部のページは特定の権限が必要な場合があります。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Log 404 error for debugging
+        console.log('[404] Page not found:', window.location.pathname);
+        console.log('[INFO] Available pages: /, /settings.html, /debug.html');
+        console.log('[INFO] Restricted pages may require special access');
+    </script>
+</body>
+</html>
